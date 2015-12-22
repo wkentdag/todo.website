@@ -19,12 +19,16 @@ app.use(bodyParser.urlencoded());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// app.use((req,res,next)=>{
+//   console.log(mongoose.connection.readyState);
+//   next()
+// })
+
 app.get('/', (req, res)=> {
   res.sendFile(__dirname + '/public/modules/index.html')
 })
 
-mongoose.connect(process.env.MONGOLAB_URI);
-console.log(mongoose.connection.readyState);
+// mongoose.connect(process.env.MONGO);
 
 require('./app/routes/routes.js')(app);
 
