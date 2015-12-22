@@ -9,7 +9,8 @@ var mongoose = require('mongoose');
 var app = express();
 
 // view engine setup
-app.set('views', path.join(__dirname, 'app/views'));
+var dir = process.env.WD = process.cwd();
+app.set('views', path.join(dir, 'app/views'));
 app.set('view engine', 'jade');
 
 app.use(favicon());
@@ -17,7 +18,7 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(dir, 'public')));
 
 // app.use((req,res,next)=>{
 //   console.log(mongoose.connection.readyState);
@@ -25,7 +26,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // })
 
 app.get('/', (req, res)=> {
-  res.sendFile(__dirname + '/public/modules/index.html')
+  res.sendFile(dir + '/public/modules/index.html')
 })
 
 // mongoose.connect(process.env.MONGO);
