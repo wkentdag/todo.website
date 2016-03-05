@@ -1,6 +1,6 @@
 const React = require('react');
 const ReactDOM = require('react-dom');
-import List from './list/components.list.js';
+import List from './components/list.component.jsx';
 
 const Bootstrapper = {
   start() {
