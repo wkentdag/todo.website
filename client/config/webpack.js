@@ -14,4 +14,4 @@ const plugins = {
 
 const pluginsArray =  Object.keys(plugins).map(k => plugins[k]);
 
-module.exports = pluginsArray;
+exports.plugins = pluginsArray;

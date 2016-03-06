@@ -1,6 +1,6 @@
-var fs = require('fs');
-var path = require('path');
-var NOTES_FILE = path.resolve(__dirname, '../../notes.json');
+const fs = require('fs');
+const path = require('path');
+const NOTES_FILE = path.resolve(__dirname, '../../notes.json');
 
 module.exports = {
   fetch: () => {

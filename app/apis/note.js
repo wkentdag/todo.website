@@ -1,6 +1,9 @@
-var notes = require('../controllers/note');
+const debug = require('debug')('api:note');
+const notes = require('../controllers/note');
 
 module.exports = function(app) {
+  debug('loading notes api');
+  
   app.get('/api/notes', (req, res)=> {
     notes.list()
     .then(data => {

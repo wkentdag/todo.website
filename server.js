@@ -1,25 +1,38 @@
-var fs = require('fs');
-var path = require('path');
-var express = require('express');
-var bodyParser = require('body-parser');
-var morgan = require('morgan');
+const mongoose = require('mongoose');
+const debug = require('debug')('server');
+import express from './app/resources/express';
 
-var app = express();
-require('./app/apis/note')(app);
+let connectˆ = () => {
+  return new Promise((resolve, reject) => {
+    mongoose.connect(process.env.DB, (err) => {
+      (err)? reject(err) : resolve(mongoose.connection);
+    });
+  });
+}
 
-app.set('port', (process.env.PORT || 3000));
-app.use(morgan('dev'));
-app.use('/', express.static(path.join(__dirname, 'dist')));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: true}));
-app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Cache-Control', 'no-cache');
-    next();
+let listenˆ = (app) => {
+  return new Promise((resolve, reject) => {
+      let port = app.get('port');
+
+      app.listen(port)
+      .on('listening', () => {
+        console.log(`Server \n\listening \n\t\t@localhost\n\t\t\t:${port}`);
+        resolve(app);
+      })
+      .on('error', (err) => {
+        console.error('\x1b[31m', `HTTP connection error`);
+        reject(err);
+      });
+  });
+}
+
+//  connect to db, init express app, start server
+const app = connectˆ()
+.then(express.start)
+.then(listenˆ)
+.catch(err => {
+  console.error('\x1b[31m', err);
+  process.exit(1);
 });
 
-app.listen(app.get('port'), () => {
-  console.log('Server \n\listening \n\t\t@localhost\n\t\t\t:%s', app.get('port'));
-});
-
-module.exports = app;
+export default app;
