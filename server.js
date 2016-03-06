@@ -3,26 +3,26 @@ const debug = require('debug')('server');
 import express from './app/resources/express';
 
 let connectˆ = () => {
-  return new Promise((resolve, reject) => {
-    mongoose.connect(process.env.DB, (err) => {
-      (err)? reject(err) : resolve(mongoose.connection);
-    });
-  });
+  return new Promise((resolve, reject) =>
+    mongoose.connect(process.env.DB, (err) =>
+      (err)? reject(err) : resolve(mongoose.connection)
+    )
+  );
 }
 
 let listenˆ = (app) => {
   return new Promise((resolve, reject) => {
-      let port = app.get('port');
+    let port = app.get('port');
 
-      app.listen(port)
-      .on('listening', () => {
-        console.log(`Server \n\listening \n\t\t@localhost\n\t\t\t:${port}`);
-        resolve(app);
-      })
-      .on('error', (err) => {
-        console.error('\x1b[31m', `HTTP connection error`);
-        reject(err);
-      });
+    app.listen(port)
+    .on('listening', () => {
+      console.log(`Server \n\listening \n\t\t@localhost\n\t\t\t:${port}`);
+      resolve(app);
+    })
+    .on('error', (err) => {
+      console.error('\x1b[31m', `HTTP connection error`);
+      reject(err);
+    });
   });
 }
 
@@ -32,6 +32,7 @@ const app = connectˆ()
 .then(listenˆ)
 .catch(err => {
   console.error('\x1b[31m', err);
+  console.error(err.stack);
   process.exit(1);
 });
 

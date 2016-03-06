@@ -5,8 +5,10 @@ module.exports = function(app) {
   app.use(function(err, req, res, next) {
     if (!err) return next();
 
-    console.error(err.stack);
-    res.status(500).send(err);
+    console.error('\x1b[31m', 'uncaught error');
+    console.error('\x1b[31m', err);
+    console.error('\x1b[31m', err.stack);
+    res.status(500).json({error: err});
   });
 
   // Assume 404 since no middleware responded

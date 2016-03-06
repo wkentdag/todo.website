@@ -1,6 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 const NOTES_FILE = path.resolve(__dirname, '../../notes.json');
+const mongoose = require('mongoose');
+const Note = mongoose.model('Note');
 
 module.exports = {
   fetch: () => {
@@ -12,20 +14,10 @@ module.exports = {
   },
   create: (note) => {
     return new Promise((resolve, reject) => {
-      module.exports.fetch()
-      .then(notes => notes.concat({
-        id: Date.now(),
-        due: note.due,
-        text: note.text
-      }))
-      .then(updated => console.log(updated))
-      .then(updated => {
-        fs.writeFile(NOTES_FILE,
-          JSON.stringify(updated,null,2), (err) => {
-          (err)? reject(err) :resolve(updated);
-        })
-      })
-      .catch(err => reject(err));
+      let doc = new Note(note);
+      doc.save((err,doc) =>
+        (err)? reject(err) : resolve(doc)
+      );
     });
   }
 };
