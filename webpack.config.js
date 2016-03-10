@@ -1,4 +1,5 @@
-var wpPlugins = require('./config/webpack/plugins.js');
+'use strict';
+let plugins = require('./client/config/webpack.js').plugins;
 
 module.exports = {
   entry: './client/index.js',
@@ -18,5 +19,5 @@ module.exports = {
     ]
   },
   devtool: 'source-map',
-  plugins: wpPlugins
+  plugins: plugins
 };
