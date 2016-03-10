@@ -1,5 +1,4 @@
-const mongoose = require('mongoose');
-let Schema = mongoose.Schema;
+import mongoose, {Schema} from 'mongoose';
 
 let NoteSchema = new Schema({
   user: {
@@ -15,7 +14,11 @@ let NoteSchema = new Schema({
   },
   complete: {
     type: Date
-  }
+  },
+  // text: {
+  //   type: String,
+  //   required: true
+  // }
 });
 
 // NoteSchema.virtual('status').get(() =>
@@ -30,4 +33,4 @@ NoteSchema.set('toJSON', { virtuals: true });
 NoteSchema.set('toObject', { virtuals: true });
 
 mongoose.model('Note', NoteSchema);
-export default mongoose.model('Note');
+export default NoteSchema;

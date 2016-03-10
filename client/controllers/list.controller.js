@@ -1,15 +1,12 @@
 const resources = require('../resources/request.js');
 const providers = require('../providers/note.js');
 
-let urlˆ = (data, stem) => {
-  return new Promise((resolve,reject) => {
-    let appended = data.map(d=> {
-      d.url = stem + `/${d.id}`;
-      return d;
-    });
-    resolve(appended);
-  });
-};
+let urlˆ = (data, stem) => Promise.resolve(
+  data.map(d => {
+    d.url = stem + `/${d._id}`;
+    return d;
+  })
+);
 
 module.exports = {
   notes: {

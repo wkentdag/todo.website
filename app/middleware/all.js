@@ -1,6 +1,6 @@
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
-const debug = require('debug')('middleware:request');
+const debug = require('debug')('middleware:all');
 
 const handleError = require('../providers/error');
 
