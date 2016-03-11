@@ -1,25 +1,42 @@
-var React = require('react');
-var marked = require('marked');
-var classNames = require('classnames');
-
-const controller = require('../controllers/list.controller.js');
+const React = require('react');
+const marked = require('marked');
+const classNames = require('classnames');
+const provider = require('../providers/notes.provider.js');
 
 
 const Note = React.createClass({
-
   parseMarkdown: function() {
     let parsed = marked(this.props.children.toString(), {sanitize: true});
     return {__html: parsed};
   },
 
   handleToggle: function(e) {
-    return controller.note.status.update(this);
+    //  update state immediately/optimistically
+    let now = new Date().getTime();
+    let completed = this.state.completed;
+    let completing = (completed)? null : now;
+    let due = this.state.due;
+    let status = (completing)
+      ? 'done'
+      : (due && due < now)
+        ? 'late'
+        : 'open'
+    ;
+    this.setState({completed: completing, status: status});
+
+    //  make request to sockets/api
+    let url = this.props.url;
+    if (completing) url += `?completed=${completing}`;
+    provider.update(url, this.props.socket, completing, this.props.id)
+    .catch(httpErr => console.error(httpErr));
   },
 
+  //  update state before making request to resource
   getInitialState: function() {
     return {
       completed: (this.props.completed)?this.props.completed : null,
-      status: controller.note.status.get(this)
+      status: this.props.status,
+      due: this.props.due
     };
   },
 
@@ -28,7 +45,7 @@ const Note = React.createClass({
       <div className={ classNames({ [`task ${this.state.status}`]: true }) }>
         <input type='checkbox'
           defaultChecked={(this.state.completed)}
-          onChange={this.handleToggle}
+          onClick={this.handleToggle}
         />
         <span dangerouslySetInnerHTML={this.parseMarkdown()} />
       </div>
@@ -36,23 +53,34 @@ const Note = React.createClass({
   }
 });
 
-const NoteList = React.createClass({
+const Notes = React.createClass({
   render: function() {
-    let notes = this.props.notes.map(function(note) {
+    let socket = this.props.socket;
+    let mappedNotes = this.props.notes.map(note => {
+      console.log(socket);
+      note.socket = socket;
+      console.log(note);
+      return note;
+    })
+    .map(note => {
+      console.log(note);
       return (
         <Note
+          key={note._id}
+          id={note._id}
           due={note.due}
-          key={note.id}
-          completed={note.completed}
+          status={note.status}
           url={note.url}
+          socket={note.socket}
         >
           {note.text}
         </Note>
       );
     });
+
     return (
       <div className="notesList">
-        {notes}
+        {mappedNotes}
       </div>
     );
   }
@@ -62,23 +90,22 @@ const NoteList = React.createClass({
 const NoteForm = React.createClass({
 
   handleDueChange: function(e) {
+    console.log(this.state);
     this.setState({due: e.target.value});
+    console.log(this.state);
   },
-
   handleTextChange: function(e) {
     this.setState({text: e.target.value});
   },
-
   handleSubmit: function(e) {
     e.preventDefault();
     let due = this.state.due;
     let text = this.state.text.trim();
-    if (!due || !text) return;
+    if (!text) return;
 
     this.setState({due: '', text: ''});
-    this.props.submit({due: due, text: text});
+    this.props.submit({due: due, text: text})
   },
-
   getInitialState: function() {
     return {due: '', text: ''};
   },
@@ -94,7 +121,7 @@ const NoteForm = React.createClass({
         />
         <input
           type="text"
-          placeholder="Say something..."
+          placeholder="Due"
           value={this.state.due}
           onChange={this.handleDueChange}
         />
@@ -107,35 +134,55 @@ const NoteForm = React.createClass({
 
 // @props   pollInterval {int} frequency w/which to fetch notes from server
 // @props   url          {str} api endpoint for notes
-const Notes = React.createClass({
-
+const List = React.createClass({
   //  api
   list: function() {
-    controller.notes.list(this);
+    provider.list(this.props.url)
+    .then(data => {
+      console.log(data);
+      this.setState({notes: data})
+    })
+    .catch(err => console.error(err));
   },
   create: function(note) {
-    controller.notes.create(this, note);
+    provider.create(this.props.url, this.state.socket, note)
+    .then( data =>
+      this.setState({notes: data})
+    )
+    .catch(err => console.error(err));
   },
 
   //  react
   componentDidMount: function() {
     this.list();
-    setInterval(this.list, this.props.pollInterval);
+
+    let socket = require('socket.io-client')('http://localhost:3000',
+      {transports: ['websocket','polling']}
+    );
+    socket.on('connect', () => {
+      console.log('connect!');
+      this.setState({socket: socket});
+    });
+    socket.on('note:new', data => {
+      console.log(`data ${JSON.stringify(data)}`);
+    });
   },
   getInitialState: function() {
-    return {notes: []}
+    return {notes: [], socket: null};
   },
 
   render: function() {
     return (
       <div className="Notes">
         <h1>Notes</h1>
-        <NoteList notes={this.state.notes} />
+        <Notes
+          notes={this.state.notes}
+          socket={this.state.socket}
+        />
         <NoteForm submit={this.create} />
       </div>
     );
   }
-
 });
 
-export default Notes;
+export default List;

@@ -1,6 +1,8 @@
+const http = require('http');
 const mongoose = require('mongoose');
 const debug = require('debug')('server');
 import express from './app/resources/express';
+import socket from './app/resources/socket';
 
 let connectˆ = () => {
   return new Promise((resolve, reject) =>
@@ -10,26 +12,20 @@ let connectˆ = () => {
   );
 }
 
-let listenˆ = (app) => {
-  return new Promise((resolve, reject) => {
-    let port = app.get('port');
-
-    app.listen(port)
-    .on('listening', () => {
-      console.log(`Server \n\listening \n\t\t@localhost\n\t\t\t:${port}`);
-      resolve(app);
-    })
-    .on('error', (err) => {
-      console.error('\x1b[31m', `HTTP connection error`);
-      reject(err);
-    });
-  });
-}
-
-//  connect to db, init express app, start server
+//  connect to db,
+//  init express app, start server,
+//  init websocket server and bind handlers
 const app = connectˆ()
 .then(express.start)
-.then(listenˆ)
+.then(app =>
+  express.listen(http.Server(app), app.get('port'))
+)
+.then(server => {
+  socket.listen(server)
+})
+.then(io =>
+  console.log(`end of the line ${io}`)
+)
 .catch(err => {
   console.error('\x1b[31m', err);
   console.error(err.stack);

@@ -9,7 +9,6 @@ const handleError = require('../providers/error');
 //  set port, CORS, logging, etc
 module.exports = function(app) {
   debug('loading default middleware');
-  app.set('port', (process.env.PORT || 3000));
   app.use(morgan('dev'));
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({extended: true}));

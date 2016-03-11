@@ -15,19 +15,19 @@ let NoteSchema = new Schema({
   complete: {
     type: Date
   },
-  // text: {
-  //   type: String,
-  //   required: true
-  // }
+  text: {
+    type: String,
+    required: true
+  }
 });
 
-// NoteSchema.virtual('status').get(() =>
-//   (this.completed)
-//     ? 'done'
-//     : this.due.getTime() > new Date().getTime()
-//       ? 'open'
-//       : 'late'
-// );
+NoteSchema.virtual('status').get(function() {
+  return (this.completed)
+    ? 'done'
+    : this.due.getTime() > new Date().getTime()
+      ? 'open'
+      : 'late';
+});
 
 NoteSchema.set('toJSON', { virtuals: true });
 NoteSchema.set('toObject', { virtuals: true });
